@@ -11,38 +11,37 @@ app.use(basicAuth({
 }));
 
 app.get("/", (req, res) => {
-    axios.get("https://api2.apeboard.finance/dopple/0xeA48756191568c83793ed10fB45B37482A84fb4a")
+    axios.get("https://api.apeboard.finance/dopple/0xeA48756191568c83793ed10fB45B37482A84fb4a")
         .then((response) => {
             if (response.data.statusCode == 500) {
                 res.status(400).send("Invalid ID");
             }
             let doppleValue = 0;
-            doppleValue = response.data.farms[0].tokens[0].balance * response.data.farms[0].tokens[0].price + response.data.farms[0].reward.balance * response.data.farms[0].reward.price;
+            doppleValue = response.data.farms[0].tokens[0].balance * response.data.farms[0].tokens[0].price + response.data.farms[0].rewards[0].balance * response.data.farms[0].rewards[0].price;
+            // doppleValue = response.data.farms[0].tokens[0].balance * response.data.farms[0].tokens[0].price +
             console.log("doppleValue = " + doppleValue);
 
-            axios.get("https://api2.apeboard.finance/alpaca/0xeA48756191568c83793ed10fB45B37482A84fb4a")
+            axios.get("https://api.apeboard.finance/alpaca/0xeA48756191568c83793ed10fB45B37482A84fb4a")
                 .then((response) => {
                     if (response.data.statusCode == 500) {
                         res.status(400).send("Invalid ID");
                     }
                     let alpacaValue = 0;
-                    alpacaValue = response.data.farms[0].value - response.data.farms[0].debtValue + (response.data.stakings[0].reward.price * response.data.stakings[0].reward.balance);
+                    alpacaValue = ((response.data.farms[0].tokens[0].balance * response.data.farms[0].tokens[0].price) + (response.data.farms[0].tokens[1].balance * response.data.farms[0].tokens[1].price)) - response.data.farms[0].debtValue + (response.data.stakings[0].rewards[0].price * response.data.stakings[0].rewards[0].balance);
                     console.log("alpacaValue = " + alpacaValue);
 
-                    axios.get("https://api2.apeboard.finance/alpha-homora/bsc/0xeA48756191568c83793ed10fB45B37482A84fb4a")
+                    axios.get("https://api.apeboard.finance/alpha-homora/bsc/0xeA48756191568c83793ed10fB45B37482A84fb4a")
                         .then((response) => {
                             if (response.data.statusCode == 500) {
                                 res.status(400).send("Invalid ID");
                             }
                             let alphaValue = 0;
-                            if (response.data.totalAssets > 0) {
-                                alphaValue = + response.data.positions[0].totalAssets - response.data.totalDebts;
-                                const alphaFarm = response.data.positions[0].totalAssets - response.data.totalDebts;
+                            if (response.data.farms[0].debtValue > 0) {
+                                alphaValue = ((response.data.farms[0].tokens[0].balance * response.data.farms[0].tokens[0].price) + (response.data.farms[0].tokens[1].balance * response.data.farms[0].tokens[1].price)) - response.data.farms[0].debtValue;
                                 console.log("alphaValue = " + alphaValue);
-                                console.log("alphaFarm = " + alphaFarm);
                             }
 
-                            axios.get("https://api2.apeboard.finance/wallet/bsc/0xeA48756191568c83793ed10fB45B37482A84fb4a")
+                            axios.get("https://api.apeboard.finance/wallet/bsc/0xeA48756191568c83793ed10fB45B37482A84fb4a")
                                 .then((response) => {
                                     if (response.data.statusCode == 500) {
                                         res.status(400).send("Invalid ID");
@@ -125,7 +124,7 @@ app.get("/", (req, res) => {
         })
         .catch((error) => {
             console.log(error);
-            res.status(500).send("error Belt");
+            res.status(500).send("error Dopple");
         });
 });
 
